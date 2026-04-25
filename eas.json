@@ -7,7 +7,14 @@
       "developmentClient": true,
       "distribution": "internal"
     },
+    "Development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
     "production": {
+      "autoIncrement": true
+    },
+    "Production": {
       "autoIncrement": true
     }
   }
