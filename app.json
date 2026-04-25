@@ -26,6 +26,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "anatoliy_1302"
+    "owner": "anatoliy_1302",
+    "extra": {
+      "eas": {
+        "projectId": "e9c675e3-0327-4053-a51c-058d92ccae44"
+      }
+    }
   }
 }
