@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Косметолог Альбина",
+    "slug": "CosmetologNew",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#9B59B6"
+    },
+    "ios": {
+      "bundleIdentifier": "com.albina.cosmetolog",
+      "supportsTablet": true,
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.albina.cosmetolog",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#9B59B6"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "owner": "anatoliy_1302"
+  }
+}
