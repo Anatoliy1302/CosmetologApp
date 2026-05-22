@@ -1,5 +1,13 @@
 {
   "expo": {
+    "plugins": [
+      ["expo-build-properties", {
+        "ios": {
+          "deploymentTarget": "15.1",
+          "useFrameworks": "static"
+        }
+      }]
+    ],
     "name": "Косметолог Альбина",
     "slug": "kosmetolog-albina",
     "version": "1.0.0",
@@ -7,8 +15,6 @@
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#9B59B6"
     },
     "ios": {
