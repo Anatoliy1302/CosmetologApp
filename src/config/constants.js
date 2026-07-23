@@ -9,7 +9,6 @@ export const MONTH_NAMES = [
   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
 ];
 
-// Функция для получения адреса по городу
 export const getAddressByCity = (city) => {
   switch (city) {
     case 'Владивосток':
@@ -26,16 +25,46 @@ export const REMINDER_TEMPLATES = {
   confirmation: '{client_name}, вы записаны!\n\nУслуга: {service}\nДата: {date}\nВремя: {time}\nАдрес: {address}\n\n📍 Ждём вас!\n\nКосметолог Альбина'
 };
 
+export const normalizePhone = (phone) => (phone || '').replace(/[^0-9]/g, '');
+
+export const toLocalDateString = (date = new Date()) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+export const parseLocalDate = (dateString) => {
+  if (!dateString) return new Date();
+  const [y, m, d] = dateString.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
+export const normalizeDateString = (dateStr) => {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const parsed = new Date(dateStr);
+  return isNaN(parsed.getTime()) ? '' : toLocalDateString(parsed);
+};
+
+export const getTomorrowDateString = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return toLocalDateString(d);
+};
+
+export const datesEqual = (a, b) => normalizeDateString(a) === normalizeDateString(b);
+
 export const formatDate = (dateString) => {
   if (!dateString) return '';
-  const date = new Date(dateString);
+  const date = parseLocalDate(normalizeDateString(dateString));
   if (isNaN(date.getTime())) return '';
   return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 export const formatShortDate = (dateString) => {
   if (!dateString) return 'Нет';
-  const date = new Date(dateString);
+  const date = parseLocalDate(normalizeDateString(dateString));
   if (isNaN(date.getTime())) return 'Нет';
   return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 };
@@ -49,5 +78,3 @@ export const formatTemplate = (template, data) => {
     .replace(/{price}/g, data.price || '0')
     .replace(/{address}/g, data.address || '');
 };
-
-export const normalizePhone = (phone) => (phone || '').replace(/[^0-9]/g, '');

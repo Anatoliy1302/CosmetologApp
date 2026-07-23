@@ -1,12 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { isClientAppointment } from '../config/storage';
 import { COLORS } from '../config/colors';
+import { getTomorrowDateString, datesEqual } from '../config/constants';
+import { sortAppointmentsByDateTime } from '../config/sort';
 
 export const DayReminders = ({ appointments, onSendReminder }) => {
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowString = tomorrowDate.toISOString().split('T')[0];
-  const tomorrowAppointments = (appointments || []).filter(app => app.date === tomorrowString && (app.type === 'client' || !app.type));
+  const tomorrowString = getTomorrowDateString();
+
+  const tomorrowAppointments = sortAppointmentsByDateTime(
+    (appointments || []).filter(app =>
+      datesEqual(app.date, tomorrowString) &&
+      isClientAppointment(app) &&
+      app.status !== 'cancelled' &&
+      !app.reminderSent
+    )
+  );
 
   if (tomorrowAppointments.length === 0) return null;
 
@@ -26,13 +35,9 @@ export const DayReminders = ({ appointments, onSendReminder }) => {
             </View>
           </View>
           <View style={styles.reminderActions}>
-            {app.reminderSent ? (
-              <View style={styles.reminderSentBadge}><Text style={styles.reminderSentText}>✓ Отправлено</Text></View>
-            ) : (
-              <TouchableOpacity style={styles.sendReminderButton} onPress={() => onSendReminder(app)}>
-                <Text style={styles.sendReminderText}>📱 Напомнить</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity style={styles.sendReminderButton} onPress={() => onSendReminder(app)}>
+              <Text style={styles.sendReminderText}>📱 Напомнить</Text>
+            </TouchableOpacity>
           </View>
         </View>
       ))}
@@ -41,7 +46,7 @@ export const DayReminders = ({ appointments, onSendReminder }) => {
 };
 
 const styles = StyleSheet.create({
-  remindersContainer: { backgroundColor: COLORS.cardBg, marginHorizontal: 15, marginBottom: 10, borderRadius: 15, padding: 15 },
+  remindersContainer: { backgroundColor: COLORS.cardBg, marginHorizontal: 15, marginBottom: 10, borderRadius: 15, padding: 15, borderWidth: 1, borderColor: COLORS.border },
   remindersHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   remindersTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.textPrimary },
   remindersCount: { fontSize: 14, color: COLORS.primary, fontWeight: '500' },
@@ -53,7 +58,5 @@ const styles = StyleSheet.create({
   reminderService: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   reminderActions: { marginLeft: 10 },
   sendReminderButton: { backgroundColor: COLORS.primary, paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
-  sendReminderText: { color: '#fff', fontSize: 13, fontWeight: '500' },
-  reminderSentBadge: { backgroundColor: COLORS.successLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  reminderSentText: { color: COLORS.success, fontSize: 12, fontWeight: '500' },
+  sendReminderText: { color: COLORS.textOnPrimary, fontSize: 13, fontWeight: '500' },
 });

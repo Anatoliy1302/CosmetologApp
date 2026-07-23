@@ -2,7 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform, Alert } from 'react-native';
 import { getAddressByCity } from './constants';
-
+import { isClientAppointment } from './storage';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -10,6 +10,8 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
   }),
 });
+
+let lastScheduledHash = '';
 
 export async function registerForPushNotificationsAsync() {
   if (Device.isDevice) {
@@ -24,7 +26,7 @@ export async function registerForPushNotificationsAsync() {
       return null;
     }
     if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('appointments', {
+      await Notifications.setNotificationChannelAsync('appointments', {
         name: 'Записи',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
@@ -36,20 +38,21 @@ export async function registerForPushNotificationsAsync() {
 
 export async function scheduleAppointmentReminder(appointment) {
   if (!appointment || !appointment.date || !appointment.time) return;
-  
+
   const address = getAddressByCity(appointment.clientCity);
   const appointmentDate = new Date(`${appointment.date}T${appointment.time}:00`);
+  if (!Number.isFinite(appointmentDate.getTime())) return;
   const reminderDate = new Date(appointmentDate);
   reminderDate.setDate(reminderDate.getDate() - 1);
   reminderDate.setHours(20, 0, 0, 0);
-  
+
   if (reminderDate <= new Date()) return;
 
   const clientName = appointment.clientName || 'Клиент';
   const serviceName = appointment.service || 'услуга';
   const secondsUntilReminder = Math.floor((reminderDate.getTime() - Date.now()) / 1000);
 
-  if (secondsUntilReminder <= 0) return;
+  if (!Number.isFinite(secondsUntilReminder) || secondsUntilReminder <= 0) return;
 
   await Notifications.scheduleNotificationAsync({
     content: {
@@ -75,10 +78,32 @@ export async function cancelAppointmentReminder(appointmentId) {
   }
 }
 
+const buildScheduleHash = (appointments) => {
+  if (!Array.isArray(appointments)) return '';
+  const clientApps = appointments.filter(isClientAppointment);
+  return clientApps
+    .map((a) => `${a.id}:${a.date}:${a.time}:${a.updatedAt || ''}`)
+    .sort()
+    .join('|');
+};
+
 export async function scheduleAllReminders(appointments) {
-  const clientApps = appointments.filter(a => a.type === 'client' || !a.type);
+  if (!Array.isArray(appointments)) return;
+  const hash = buildScheduleHash(appointments);
+  if (hash === lastScheduledHash) return;
+  lastScheduledHash = hash;
+
+  const clientApps = appointments.filter(isClientAppointment);
   await Notifications.cancelAllScheduledNotificationsAsync();
   for (const app of clientApps) {
-    await scheduleAppointmentReminder(app);
+    try {
+      await scheduleAppointmentReminder(app);
+    } catch (error) {
+      console.warn('Не удалось запланировать напоминание:', app?.id, error?.message || error);
+    }
   }
+}
+
+export function resetReminderCache() {
+  lastScheduledHash = '';
 }

@@ -1,21 +1,41 @@
 {
   "cli": {
-    "version": ">= 3.0.0"
+    "version": ">= 3.0.0",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      }
     },
-    "Development": {
-      "developmentClient": true,
-      "distribution": "internal"
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "adhoc": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": false,
+        "enterpriseProvisioning": "adhoc"
+      }
     },
     "production": {
-      "autoIncrement": true
-    },
-    "Production": {
-      "autoIncrement": true
+      "distribution": "store",
+      "ios": {
+        "simulator": false
+      }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
